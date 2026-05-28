@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sa-top: env(safe-area-inset-top, 0px);
+    --sa-bottom: env(safe-area-inset-bottom, 0px);
+    --sa-left: env(safe-area-inset-left, 0px);
+    --sa-right: env(safe-area-inset-right, 0px);
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background: #0a0a0a;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    background: #0a0a0a;
+    color: #ffffff;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0.005em;
+  }
+
+  body.scroll-lock {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  input, select, textarea, button {
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  button {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    background: none;
+    border: none;
+    color: inherit;
+  }
+
+  a, button {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .btn-luxury {
+    @apply inline-flex items-center gap-4 px-10 py-5 text-[0.72rem] font-medium tracking-[0.3em] uppercase bg-ink text-bg border border-ink relative overflow-hidden transition-all duration-500;
+  }
+  .btn-luxury:hover {
+    @apply text-ink;
+  }
+  .btn-luxury::before {
+    content: '';
+    @apply absolute inset-0 bg-bg z-[-1];
+    transform: translateX(-101%);
+    transition: transform 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+  }
+  .btn-luxury:hover::before {
+    transform: translateX(0);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-3 px-8 py-5 text-[0.72rem] font-normal tracking-[0.3em] uppercase text-ink bg-transparent border border-white/30 transition-all duration-500;
+  }
+  .btn-outline:hover {
+    @apply border-ink bg-white/5;
+  }
+
+  .section-eyebrow {
+    @apply inline-flex items-center gap-3 text-[0.7rem] font-normal tracking-[0.35em] uppercase text-muted mb-6;
+  }
+  .section-eyebrow::before {
+    content: '';
+    @apply w-10 h-px bg-muted;
+  }
+
+  .section-title {
+    @apply font-display text-[clamp(2.5rem,6vw,5rem)] leading-none tracking-[-0.02em] font-normal mb-6;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
+  .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  .px-safe {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn-luxury:hover::before { transform: translateX(-101%); }
+}
