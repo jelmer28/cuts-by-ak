@@ -3,7 +3,7 @@ import type { Customer } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 
 export default async function CustomersPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: customers } = await supabase
     .from('customers')
     .select('*')

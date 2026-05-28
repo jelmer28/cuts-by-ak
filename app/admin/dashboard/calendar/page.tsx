@@ -1,98 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-const days = ['MAA', 'DIN', 'WOE', 'DON', 'VRI', 'ZAT', 'ZON'];
+import { createClient } from '@/lib/supabase-server';
+import { getDateRange } from '@/lib/utils';
+import type { Booking } from '@/lib/types';
+import { CalendarView } from '@/components/admin/CalendarView';
 
 export default async function CalendarPage() {
+  const supabase = createClient();
+  const week = getDateRange('week');
+
+  // Get next 4 weeks of bookings
+  const end = new Date(week.start);
+  end.setDate(end.getDate() + 28);
+
   const { data: bookings } = await supabase
-    .from('Bookings')
+    .from('bookings')
     .select('*')
-    .order('start_at', { ascending: true });
-
-  const currentDate = new Date();
-
-  const startOfWeek = new Date(currentDate);
-  startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
-
-  const weekDays = [...Array(7)].map((_, index) => {
-    const day = new Date(startOfWeek);
-    day.setDate(startOfWeek.getDate() + index);
-    return day;
-  });
+    .gte('start_at', week.start.toISOString())
+    .lte('start_at', end.toISOString())
+    .in('status', ['pending', 'confirmed', 'completed'])
+    .order('start_at');
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
-      <div className="mb-10">
-        <div className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-3">
-          Agenda
-        </div>
-
-        <h1 className="text-6xl font-light">
-          Weekoverzicht <span className="italic text-neutral-500">agenda</span>
+    <div className="p-6 md:p-12">
+      <div className="mb-8">
+        <div className="text-[0.7rem] tracking-[0.3em] uppercase text-muted mb-2">Agenda</div>
+        <h1 className="font-display text-3xl md:text-5xl font-normal">
+          Weekoverzicht <em className="italic text-muted">agenda</em>
         </h1>
       </div>
-
-      <div className="grid grid-cols-7 gap-0 border border-neutral-900">
-        {weekDays.map((day, index) => {
-          const dayBookings =
-            bookings?.filter((booking) => {
-              const bookingDate = new Date(booking.start_at);
-
-              return (
-                bookingDate.getDate() === day.getDate() &&
-                bookingDate.getMonth() === day.getMonth() &&
-                bookingDate.getFullYear() === day.getFullYear()
-              );
-            }) || [];
-
-          return (
-            <div
-              key={index}
-              className="min-h-[300px] border-r border-neutral-900 p-4"
-            >
-              <div className="text-xs tracking-[0.25em] text-neutral-500 mb-3">
-                {days[index]}
-              </div>
-
-              <div className="text-3xl mb-6">
-                {day.getDate()}
-              </div>
-
-              <div className="space-y-3">
-                {dayBookings.length === 0 ? (
-                  <div className="text-neutral-700">—</div>
-                ) : (
-                  dayBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="border border-neutral-800 rounded-xl p-3"
-                    >
-                      <div className="font-semibold">
-                        {booking.customer_name}
-                      </div>
-
-                      <div className="text-sm text-neutral-400">
-                        {booking.customer_phone}
-                      </div>
-
-                      <div className="text-sm text-neutral-500 mt-2">
-                        {new Date(booking.start_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </main>
+      <CalendarView bookings={(bookings as Booking[]) || []} />
+    </div>
   );
 }

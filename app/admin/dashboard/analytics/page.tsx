@@ -3,7 +3,7 @@ import { formatPrice, getDateRange } from '@/lib/utils';
 import type { Booking } from '@/lib/types';
 
 export default async function AnalyticsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Last 30 days stats
   const thirtyDaysAgo = new Date();

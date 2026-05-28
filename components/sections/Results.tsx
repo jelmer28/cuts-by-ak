@@ -45,10 +45,10 @@ export function Results() {
             className={`relative overflow-hidden bg-bg-card group cursor-pointer aspect-[4/5] ${r.span}`}
           >
             <div
-              className="absolute inset-0 bg-cover bg-center transition-all duration-[1000ms] ease-out group-hover:scale-105"
+              className="absolute inset-0 bg-cover bg-center transition-all duration-[1000ms] ease-out group-hover:scale-105 group-hover:brightness-100"
               style={{
                 backgroundImage: `url('${r.img}')`,
-                filter: 'grayscale(100%) contrast(1.1) brightness(0.85)',
+                filter: 'brightness(0.85) contrast(1.05)',
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg/85 pointer-events-none" />

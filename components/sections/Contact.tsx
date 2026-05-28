@@ -4,12 +4,40 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { BUSINESS, OPENING_HOURS, DAY_NAMES_NL } from '@/lib/config';
 
+interface DayStatus {
+  isToday: boolean;
+  isOpenNow: boolean;
+}
+
 export function Contact() {
-  const [today, setToday] = useState<number | null>(null);
+  // Re-render every minute so the dot turns green/red exactly at open/close time
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    setToday(new Date().getDay());
+    setNow(new Date());
+    const interval = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(interval);
   }, []);
+
+  function getDayStatus(day: number): DayStatus {
+    if (!now) return { isToday: false, isOpenNow: false };
+    const isToday = now.getDay() === day;
+    if (!isToday) return { isToday: false, isOpenNow: false };
+
+    const hours = OPENING_HOURS[day];
+    if (!hours) return { isToday: true, isOpenNow: false };
+
+    const [openH, openM] = hours.open.split(':').map(Number);
+    const [closeH, closeM] = hours.close.split(':').map(Number);
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+
+    return {
+      isToday: true,
+      isOpenNow: nowMinutes >= openMinutes && nowMinutes < closeMinutes,
+    };
+  }
 
   // Render rows in display order (Mon-Sun)
   const orderedDays = [1, 2, 3, 4, 5, 6, 0];
@@ -106,29 +134,40 @@ export function Contact() {
             <div className="flex flex-col mt-2">
               {orderedDays.map((day) => {
                 const hours = OPENING_HOURS[day];
-                const isToday = today === day;
-                const isClosed = hours === null;
+                const isClosedDay = hours === null;
+                const { isToday, isOpenNow } = getDayStatus(day);
+
                 return (
                   <div
                     key={day}
-                    className={`flex justify-between py-3 border-b border-line last:border-b-0 text-sm ${
+                    className={`flex justify-between items-center py-3 border-b border-line last:border-b-0 text-sm ${
                       isToday ? 'text-ink' : 'text-ink-soft'
                     }`}
                   >
-                    <span className={`tracking-wide font-light ${isToday ? 'text-ink' : 'text-muted'}`}>
-                      {DAY_NAMES_NL[day]}
+                    <span
+                      className={`tracking-wide flex items-center gap-[0.65rem] ${
+                        isToday ? 'text-ink font-normal' : 'text-muted font-light'
+                      }`}
+                    >
                       {isToday && (
-                        <span className="ml-2 text-[0.7rem] tracking-wider uppercase text-accent">
-                          {isClosed ? '· vandaag gesloten' : '· nu open'}
-                        </span>
+                        <span
+                          className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                          style={{
+                            background: isOpenNow ? '#4ade80' : '#ef4444',
+                            animation: isOpenNow
+                              ? 'pulseGreen 2.5s infinite'
+                              : 'pulseRed 2.5s infinite',
+                          }}
+                        />
                       )}
+                      {DAY_NAMES_NL[day]}
                     </span>
                     <span
                       className={`tabular-nums font-light ${
-                        isClosed ? 'text-muted-dim italic' : 'text-ink-soft'
+                        isClosedDay ? 'text-muted-dim italic' : 'text-ink-soft'
                       }`}
                     >
-                      {isClosed ? 'Gesloten' : `${hours!.open} — ${hours!.close}`}
+                      {isClosedDay ? 'Gesloten' : `${hours!.open} — ${hours!.close}`}
                     </span>
                   </div>
                 );

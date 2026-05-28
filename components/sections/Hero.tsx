@@ -51,6 +51,7 @@ export function Hero({ onBookClick }: HeroProps) {
             backgroundImage:
               "url('https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=1920&q=90')",
             backgroundPosition: 'center 30%',
+            filter: 'grayscale(100%) contrast(1.05)',
           }}
         />
         {/* Desktop video */}
@@ -59,6 +60,7 @@ export function Hero({ onBookClick }: HeroProps) {
           className={`hidden md:block absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
             videoLoaded ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{ filter: 'grayscale(100%) contrast(1.05)' }}
           autoPlay
           muted
           loop

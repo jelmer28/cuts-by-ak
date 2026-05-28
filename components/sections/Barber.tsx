@@ -17,7 +17,7 @@ export function Barber() {
               "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1200&q=90')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            filter: 'grayscale(100%) contrast(1.1)',
+            filter: 'contrast(1.05)',
           }}
         >
           <div

@@ -1,60 +1,26 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from '@/lib/supabase-server';
+import type { Booking } from '@/lib/types';
+import { BookingsTable } from '@/components/admin/BookingsTable';
 
 export default async function BookingsPage() {
-  const { data: bookings, error } = await supabase
-  .from('Bookings')
-  .select('*')
-  .order('start_at', { ascending: false });
+  const supabase = createClient();
+  const { data: bookings } = await supabase
+    .from('bookings')
+    .select('*')
+    .order('start_at', { ascending: false })
+    .limit(100);
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-5xl mb-10">Alle reserveringen</h1>
-
-      {error && (
-        <div className="text-red-500 mb-5">
-          {error.message}
+    <div className="p-6 md:p-12">
+      <div className="mb-8">
+        <div className="text-[0.7rem] tracking-[0.3em] uppercase text-muted mb-2">
+          Reserveringen
         </div>
-      )}
-
-      <div className="space-y-5">
-        {bookings?.map((booking) => (
-          <div
-            key={booking.id}
-            className="border border-neutral-800 p-6 rounded-xl"
-          >
-            <div className="text-2xl font-semibold">
-              {booking.customer_name}
-            </div>
-
-            <div className="mt-2">
-              {booking.customer_phone}
-            </div>
-
-            <div>
-              {booking.customer_email || 'Geen email'}
-            </div>
-
-            <div className="mt-4 text-neutral-400">
-              Service: {booking.service_id}
-            </div>
-
-            <div className="text-neutral-500">
-              {new Date(booking.start_at).toLocaleString()}
-            </div>
-          </div>
-        ))}
-
-        {bookings?.length === 0 && (
-          <div className="text-neutral-500">
-            Geen reserveringen gevonden
-          </div>
-        )}
+        <h1 className="font-display text-3xl md:text-5xl font-normal">
+          Alle <em className="italic text-muted">reserveringen</em>
+        </h1>
       </div>
-    </main>
+      <BookingsTable initial={(bookings as Booking[]) || []} />
+    </div>
   );
 }
